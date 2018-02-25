@@ -1,8 +1,6 @@
-import { ExtendedAPIPlugin } from '../Users/nj/AppData/Local/Microsoft/TypeScript/2.6/node_modules/@types/webpack';
-
-// import html-plugin
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
+var path = require("path");
 
 module.exports = {
     // source file
@@ -10,32 +8,44 @@ module.exports = {
     // output file
     output: {
         // path
-        path: 'dist',
+        path: path.resolve(__dirname, "build"),
         // filename
         filename: 'app.bundle.js'
     },
     module: {
         rules: [
-            { test: /\.scss$/, use: ExtractTextPlugin.extract(['style-loader','css-loader','sass-loader'])}
+            {
+                test: /\.scss$/, 
+                use: ExtractTextPlugin.extract({
+                    fallbackLoader: 'style-loader',
+                    loader: ['css-loader','sass-loader'],
+                    publicPath: '/dist'
+                })
+            }
         ]
+    },
+    devServer: {
+        contentBase: path.join(__dirname, "dist"),
+        compress: true,
+        port: 9000
     },
     // using plugins
     plugins: [
         new HtmlWebpackPlugin({
-        // custom title
-        title: 'Project',
-        minify: {
-            collapseWhitespace: true
-        },
-        hash: true,
+            // custom title
+            title: 'Project',
+            minify: {
+                collapseWhitespace: true
+            },
+            hash: true,
 
-        // custom html template
-        template: './src/index.ejs',
-    }),
-    new ExtendedAPIPlugin({
-        filename: 'app.css',
-        disabled: false,
-        allChunks: true
-    })
-]
+            // custom html template
+            template: './src/index.ejs',
+        }),
+        new ExtractTextPlugin({
+            filename: 'app.css',
+            disabled: false,
+            allChunks: true
+        })
+    ]
 }
